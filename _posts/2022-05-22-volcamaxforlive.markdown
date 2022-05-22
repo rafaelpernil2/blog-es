@@ -1,7 +1,12 @@
 ---
 title: volca sample2 polyphonic chromatic player - A Max4Live plugin to use a KORG
   volca sample2 as a polyphonic chromatic sample player
-date: 2022-05-22 16:47:00 +02:00
+date: 2022-05-22 01:13:00 +02:00
+categories:
+- MIDI
+tags:
+- MIDI
+- Software
 ---
 
 ![Sin título.png](https://feranern.sirv.com/Images/Sin%20t%C3%ADtulo.png)
