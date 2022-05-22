@@ -1,6 +1,6 @@
 ---
-title: volca sample2 polyphonic chromatic player - A Max4Live plugin to use a KORG
-  volca sample2 as a polyphonic chromatic sample player
+title: volca sample2 polyphonic chromatic player - Un plugin Max4Live para usar un
+  KORG volca sample2 como reproductor cromático de samples
 date: 2022-05-22 01:13:00 +02:00
 categories:
 - MIDI
@@ -11,53 +11,53 @@ tags:
 
 ![Sin título.png](https://feranern.sirv.com/Images/Sin%20t%C3%ADtulo.png)
 
-This little project started from my goal of learning MIDI programming and Max programming language, joining my both passions, software and music.
+Este pequeño proyecto partió de mi objetivo de aprender programación MIDI y el lenguaje de programación Max, uniendo mis dos pasiones, el software y la música.
 
-I was reading the MIDI Implementation of my new volca sample2 to see what can be done and to my surprise, I could transform this device into a sample-based synth with a very simple transformation.
+Estaba leyendo la implementación MIDI de mi nuevo volca sample2 para ver qué se puede hacer y, para mi sorpresa, pude transformar este dispositivo en un sintetizador basado en muestras con una transformación muy simple.
 
-CC#49 is used for chromatic speed (i.e, setting the exact note of the sample), so I thought I could translate MIDI Note On messages to CC#49 values and a note on message to trigger the sound.
+CC#49 se usa para la velocidad cromática (es decir, establecer la nota exacta de la muestra), así que pensé que podría traducir los mensajes MIDI Note On a valores CC#49 y un mensaje de nota para activar el sonido.
 
-I opened a MIDI Monitor and checked how the notes and CC#49 correlated. It turns out for CC#49 middle C has the value 64 while MIDI specification uses a value 60 as middle C. Simple math: add 4 to the note value
+Abrí un monitor MIDI y verifiqué cómo se correlacionaban las notas y CC#49. Resulta que CC#49 Do central tiene el valor 64 mientras que la especificación MIDI usa un valor 60 como Do central. Matemáticas simples: suma 4 al valor de la nota
 
-Well, that was easy, it took me only a few hours with little knowledge of Max. But I thought... Okay, this device has 8 note polyphony, if I map a note to a channel, I can have 8-voice polyphony! But here the complexity skyrocketed, mainly because of Ableton Live/Max4Live limitations.
+Bueno, eso fue fácil, solo me tomó unas pocas horas con poco conocimiento de Max. Pero pensé... Bien, este dispositivo tiene polifonía de 8 notas, si asigno una nota a un canal, ¡puedo tener polifonía de 8 voces! Pero aquí la complejidad se disparó, principalmente debido a las limitaciones de Ableton Live/Max4Live.
 
-Let me explain the flow: Key x is pressed on MIDI keyboard → NoteON message is sent → Obtain MIDI channel to use, trying to avoid channels in use → Transform note value to CC#49 message → Send CC#49 and NoteOn to Volca
+Permítanme explicar el flujo: Se presiona la tecla x en el teclado MIDI → Se envía el mensaje NoteON → Obtener el canal MIDI para usar, tratando de evitar los canales en uso → Transformar el valor de la nota en el mensaje CC#49 → Enviar CC#49 y NoteOn a Volca
 
-But I can only output to one MIDI channel per instance of plugin... So, how do I determine where to output? By having one instance per track and manually setting which MIDI channel each instance has to output to.
+Pero solo puedo enviar a un canal MIDI por instancia de complemento ... Entonces, ¿cómo determino dónde enviar? Al tener una instancia por pista y configurar manualmente a qué canal MIDI tiene que salir cada instancia.
 
-And how do I communicate between different instances? It’s complicated, you can’t connect with specific instances, you can only broadcast messages. How do you know which channel to use if you don’t know which is the last one used?
+¿Y cómo me comunico entre diferentes instancias? Es complicado, no puedes conectarte con instancias específicas, solo puedes transmitir mensajes. ¿Cómo sabes qué canal usar si no sabes cuál es el último que se usó?
 
-I had to resort to a simple but imperfect algorithm, “Note count”. Using the “borax” component, you can get the amount of notes being active, so...
+Tuve que recurrir a un algoritmo simple pero imperfecto, "Cuenta de notas". Usando el componente "bórax", puede obtener la cantidad de notas activas, así que...
 
-1 note active → Channel 1, ...8 notes active → Channel 8
+1 nota activa → Canal 1, ...8 notas activas → Canal 8
 
-Problems:
+Problemas:
 
-With melodies, the next note collapses with the previous one... Polyphony is destroyed, it works like a monophonic synth
-The same happens with chords and it easy to lose notes while playing
-Good things:
+Con melodías, la siguiente nota colapsa con la anterior... La polifonía se destruye, funciona como un sintetizador monofónico
+Lo mismo sucede con los acordes y es fácil perder notas mientras se toca.
+Cosas buenas:
 
-It works and serves as a Proof of Concept
-It can be quite musical and provide interesting limitations for playing differently
-As a last feature, I added a global selector for samples. Using message broadcasting (send and receive components) I send the same sample selected to all 8 channels. I think it was absolutely needed for this plugin to be usable. Changing samples one by one for all tracks is tedious.
+Funciona y sirve como prueba de concepto
+Puede ser bastante musical y proporcionar limitaciones interesantes para tocar de manera diferente.
+Como última característica, agregué un selector global para muestras. Usando la transmisión de mensajes (componentes de envío y recepción), envío la misma muestra seleccionada a los 8 canales. Creo que era absolutamente necesario que este complemento fuera utilizable. Cambiar muestras una por una para todas las pistas es tedioso.
 
-There’s some interesting logic here too! The volca sample2 has a maximum capacity of 200 samples, but CC/Program change messages only go from 0 to 127 (7 bits), that means 2 messages are used for creating the message.
+¡Aquí también hay una lógica interesante! El volca sample2 tiene una capacidad máxima de 200 muestras, pero los mensajes de cambio de programa/CC solo van de 0 a 127 (7 bits), lo que significa que se utilizan 2 mensajes para crear el mensaje.
 
-First, a MSB (Most Significant Bit, CC#3) that represents if the sample is between 0-99 or 100-199 and is either 0 or 1
+Primero, un MSB (bit más significativo, CC#3) que representa si la muestra está entre 0-99 o 100-199 y es 0 o 1
 
-Then, the LSB (Least Significant Bit, CC#35) goes from 0 to 99
+Luego, el LSB (bit menos significativo, CC#35) va de 0 a 99
 
-So, the math is the following for getting the sample number from the messages: MSB*100 + LSB
+Entonces, la matemática es la siguiente para obtener el número de muestra de los mensajes: MSB*100 + LSB
 
-And this is the math for obtaining each part:
+Y esta es la matemática para obtener cada parte:
 
-MSB = Sample Number / 100
+MSB = Número de muestra / 100
 
-LSB = Sample Number % 100 (Modulo operation)
+LSB = Número de muestra % 100 (operación de módulo)
 
-It was a great learning experience, feel free to modify it and play with the code. Since Max is a visual programming language, I can also show in one screenshot how it works:
+Fue una gran experiencia de aprendizaje, siéntete libre de modificarlo y jugar con el código. Dado que Max es un lenguaje de programación visual, también puedo mostrar en una captura de pantalla cómo funciona:
 
 ![volcasamplemax.png](https://feranern.sirv.com/Images/volcasamplemax.png)
 
 
-Extending and improving this project, I created a new version based on WebMIDI. It’s WAY better, you’ll see :P
+Ampliando y mejorando este proyecto, creé una nueva versión basada en WebMIDI. Es MUCHO mejor, ya verás :P
