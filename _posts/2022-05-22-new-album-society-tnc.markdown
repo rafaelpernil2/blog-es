@@ -22,3 +22,5 @@ Musicalmente, hay un gran cambio en mi proceso creativo habitual. Aprendí dise�
 Se sigue basando en la improvisación pero con un concepto subyacente predefinido y bien documentado.
 
 En fin, espero que te guste :)
+
+Link: [https://distrokid.com/hyperfollow/rafaelpernil/society-terms-and-conditions-2](https://distrokid.com/hyperfollow/rafaelpernil/society-terms-and-conditions-2)
